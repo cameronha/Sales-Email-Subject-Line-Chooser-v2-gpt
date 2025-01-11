@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Subject Line Quiz</title>
+
+  <!-- Import Libre Franklin from Google Fonts -->
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600&display=swap" 
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      /* Brand Colors & Font */
+      --color-primary: #5193BD;    /* Antiroyal Blue */
+      --color-secondary: #EC5C6B;  /* Neon Red */
+      --color-border: #BEC6CC;     /* Light Gray */
+      --color-text: #232425;       /* Black or dark gray */
+      --color-bg: #F0F3F5;         /* White-ish background */
+      --color-correct-bg: #d4edda; /* Light green or brand color for correct */
+      --color-incorrect-bg: #f8d7da; /* Light red for incorrect */
+      --font-family: 'Libre Franklin', Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+
+    #quiz-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #question {
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+
+    .option-button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background-color: #fff;
+      text-align: left;
+      transition: background-color 0.2s ease;
+    }
+
+    .option-button:hover {
+      background-color: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+
+    #feedback {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+      font-size: 0.95rem;
+      white-space: pre-line; /* Allows multi-line feedback if desired */
+    }
+
+    .correct-feedback {
+      background-color: var(--color-correct-bg);
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .incorrect-feedback {
+      background-color: var(--color-incorrect-bg);
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    #next-btn {
+      display: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--color-primary);
+      color: #fff;
+      transition: background-color 0.2s ease;
+    }
+
+    #next-btn:hover {
+      background-color: #3e789a; /* Slightly darker shade of primary */
+    }
+
+    #results {
+      display: none;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #results p {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    /* Newsletter CTA styling */
+    #newsletter-cta {
+      margin-bottom: 20px;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    #newsletter-cta a {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    #newsletter-cta a:hover {
+      text-decoration: underline;
+    }
+
+    /* Replay button in results */
+    #results button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--color-primary);
+      color: #fff;
+      transition: background-color 0.2s ease;
+    }
+
+    #results button:hover {
+      background-color: #3e789a; 
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Subject Line Quiz</h1>
+
+  <div id="quiz-container">
+    <div id="question"></div>
+    <button id="optionA" class="option-button"></button>
+    <button id="optionB" class="option-button"></button>
+
+    <div id="feedback"></div>
+    <button id="next-btn">Next</button>
+  </div>
+
+  <div id="results">
+    <h2>Quiz Complete!</h2>
+    <p id="score"></p>
+    <div id="newsletter-cta"></div>
+    <button onclick="location.reload()">Play Again</button>
+  </div>
+
+  <script>
+    // Quiz Data
+    const questions = [
+      {
+        prompt: "You want to reconnect with a potential lead who’s recently shown interest in your product.",
+        optionA: "Quick question about your product launch",
+        optionB: "Ready to talk about your product launch?",
+        correct: "A",
+        feedbackCorrectA: 
+          "**Nice work!** This subject line feels casual and curious. It piques the prospect’s interest without being pushy.",
+        feedbackIncorrectB: 
+          "**Not quite!** This subject line can feel more direct and possibly pushy, suggesting a more involved discussion."
+      },
+      {
+        prompt: "You’re emailing a business owner who’s concerned about website speed.",
+        optionA: "We discovered a quick way to speed up your website",
+        optionB: "Need help fixing slow website performance?",
+        correct: "A",
+        feedbackCorrectA: 
+          "**Right on!** This implies you have a specific solution and invites curiosity. Leading with value often beats asking a broad question.",
+        feedbackIncorrectB: 
+          "**Good try, but not quite!** This subject line focuses on the problem instead of offering a benefit."
+      },
+      {
+        prompt: "You’re reaching out to a marketing director you’ve never met before.",
+        optionA: "[Name], a quick idea for your new marketing campaign",
+        optionB: "Improve your marketing campaign: 3 easy tips",
+        correct: "A",
+        feedbackCorrectA: 
+          "**Nice choice!** Using the recipient’s name and referencing their campaign is more personal and often increases open rates.",
+        feedbackIncorrectB: 
+          "**Close, but not the best!** Generic tips get lost. Personalization is key for standing out."
+      },
+      {
+        prompt: "You noticed a potential client posted something interesting on LinkedIn, and you want to follow up.",
+        optionA: "Saw your post on LinkedIn—here’s a related idea",
+        optionB: "Let’s collaborate on LinkedIn marketing ideas",
+        correct: "A",
+        feedbackCorrectA: 
+          "**Great pick!** Directly referencing their recent post shows you’re paying attention and have something relevant to share.",
+        feedbackIncorrectB: 
+          "**Not quite!** ‘Let’s collaborate’ is too general and doesn’t reference anything specific they posted."
+      },
+      {
+        prompt: "You’re reaching out to congratulate a startup founder on securing funding and to offer a growth tip.",
+        optionA: "Congrats on the funding! A quick growth tip",
+        optionB: "Important info about your next growth phase",
+        correct: "A",
+        feedbackCorrectA: 
+          "**Exactly!** This acknowledges their achievement and presents a small, easy-to-digest resource. Authentic and direct works best.",
+        feedbackIncorrectB: 
+          "**Not quite!** ‘Important info’ can feel vague or clickbait-y. Citing their new funding success and offering a quick tip is more personal."
+      }
+    ];
+
+    // DOM Elements
+    const questionEl = document.getElementById("question");
+    const optionAEl = document.getElementById("optionA");
+    const optionBEl = document.getElementById("optionB");
+    const feedbackEl = document.getElementById("feedback");
+    const nextBtnEl = document.getElementById("next-btn");
+    const quizContainerEl = document.getElementById("quiz-container");
+    const resultsEl = document.getElementById("results");
+    const scoreEl = document.getElementById("score");
+    const newsletterCtaEl = document.getElementById("newsletter-cta");
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function loadQuestion() {
+      const currentQuestion = questions[currentQuestionIndex];
+      questionEl.textContent = currentQuestion.prompt;
+      optionAEl.textContent = currentQuestion.optionA;
+      optionBEl.textContent = currentQuestion.optionB;
+
+      feedbackEl.style.display = "none";
+      feedbackEl.className = "";
+      feedbackEl.textContent = "";
+
+      nextBtnEl.style.display = "none";
+      answered = false;
+    }
+
+    function handleOptionClick(chosenOption) {
+      if (answered) return; 
+      answered = true;
+
+      const currentQuestion = questions[currentQuestionIndex];
+      const correctOption = currentQuestion.correct;
+
+      feedbackEl.style.display = "block";
+
+      if (chosenOption === correctOption) {
+        score++;
+        // Correct feedback
+        if (chosenOption === "A") {
+          feedbackEl.innerHTML = currentQuestion.feedbackCorrectA;
+        } else {
+          feedbackEl.innerHTML = currentQuestion.feedbackCorrectB;
+        }
+        feedbackEl.className = "correct-feedback";
+      } else {
+        // Incorrect feedback
+        if (chosenOption === "A") {
+          feedbackEl.innerHTML = currentQuestion.feedbackIncorrectA || "Incorrect!";
+        } else {
+          feedbackEl.innerHTML = currentQuestion.feedbackIncorrectB || "Incorrect!";
+        }
+        feedbackEl.className = "incorrect-feedback";
+      }
+
+      nextBtnEl.style.display = "inline-block";
+    }
+
+    function handleNextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      quizContainerEl.style.display = "none";
+      resultsEl.style.display = "block";
+      scoreEl.textContent = `You got ${score} out of ${questions.length} correct!`;
+
+      // Dynamic CTA based on score
+      const passingScore = 3; // Set this threshold however you like
+      if (score < passingScore) {
+        newsletterCtaEl.innerHTML = 
+          `It looks like you might want to sharpen your skills a bit more. 
+          <a href="https://www.camhouser.com/newsletter" target="_blank">Sign up for my newsletter</a> 
+          for more tips on writing killer subject lines!`;
+      } else {
+        newsletterCtaEl.innerHTML =
+          `Great job! You clearly know your subject lines. 
+          Keep that momentum going by 
+          <a href="https://www.camhouser.com/newsletter" target="_blank">
+          joining my newsletter</a> to level up your skills even more!`;
+      }
+    }
+
+    // Event Listeners
+    optionAEl.addEventListener("click", () => handleOptionClick("A"));
+    optionBEl.addEventListener("click", () => handleOptionClick("B"));
+    nextBtnEl.addEventListener("click", handleNextQuestion);
+
+    // Start the quiz
+    loadQuestion();
+  </script>
+</body>
+</html>
